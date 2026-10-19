@@ -1,6 +1,9 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const bd = require("./bd");
+// Herramienta para ver los archivos de Cassandra (pagina Almacen)
+const almacen = require("./almacen");
 const { KS, LocalDate, crearCliente, diaLocal, ejecutar, guardarLectura, leerSensores } = require("./bd");
 
 const PUERTO = 3000;
@@ -91,6 +94,10 @@ http.createServer(async (req, res) => {
       let cuerpo = "";
       for await (const parte of req) cuerpo += parte;
       respuesta = await registrar(JSON.parse(cuerpo || "{}"));
+    }
+    else if (ruta.startsWith("/api/almacen/")) {
+      respuesta = await almacen.ruta(req, ruta, url.searchParams);
+      if (respuesta === null) { codigo = 404; respuesta = { error: "Ruta no encontrada: " + ruta }; }
     }
     else { codigo = 404; respuesta = { error: "Ruta no encontrada: " + ruta }; }
   } catch (e) {
